@@ -2,3 +2,4 @@ Terraform/.terraform.lock.hcl
 Terraform/terraform.tfstate
 Terraform/terraform.tfstate.backup
 Terraform/.terraform/providers/registry.terraform.io/hashicorp/google/4.68.0/linux_amd64/terraform-provider-google_v4.68.0_x5
+Terraform/service_account_key.json
