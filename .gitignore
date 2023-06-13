@@ -3,3 +3,6 @@ Terraform/terraform.tfstate
 Terraform/terraform.tfstate.backup
 Terraform/.terraform/providers/registry.terraform.io/hashicorp/google/4.68.0/linux_amd64/terraform-provider-google_v4.68.0_x5
 Terraform/.terraform/providers/registry.terraform.io/hashicorp/google/4.69.1/linux_amd64/terraform-provider-google_v4.69.1_x5
+subtle-tooling-387906-5872adcfbee0.json
+script.sh
+config
