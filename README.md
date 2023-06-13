@@ -17,21 +17,35 @@ The project consists of the following components:
 
 Before running the project, make sure you have the following prerequisites installed and configured:
 
-1. Google Cloud Platform (GCP) account with appropriate permissions.
+1. Google Cloud Platform (GCP) service account with appropriate permissions.
 2. Terraform CLI installed.
-3. Ansible installed.
-4. Docker installed.
+3. kubectl installed.
+4. Ansible installed.
+5. Docker installed.
 
 ## Installation
 
 To deploy the Jenkins pipeline, follow these steps:
 
 1. Clone the repository:
-
    ```bash
    git clone https://github.com/your-username/your-project.git
+   ```
 
+2. Update the terraform.tfvars file with your GCP credentials and desired cluster configuration.
 
-gcloud container clusters get-credentials $(terraform output -raw kubernetes_cluster_name) --region $(terraform output -raw region)
+```bash
+   git clone https://github.com/your-username/your-project.git
+   ```
 
-kubectl get service <service-name> -n default --output='jsonpath={.spec.clusterIP}'
+3. Initialize the Terraform project:
+
+```bash
+Copy code
+terraform init
+```
+Create the GKE cluster:
+
+bash
+Copy code
+terraform apply
