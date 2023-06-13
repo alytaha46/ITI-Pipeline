@@ -8,7 +8,7 @@ The project consists of the following components:
 
 1. `Terraform/`: Contains Terraform code for creating the GKE private cluster, vpc, subnet and nat gateway.
 
-![Image Description](./diagram.jpg)
+![Image Description](./images/diagram.jpg)
 
 2. `ansible/`: Contains Ansible playbook for deploying Jenkins on the GKE cluster using kubectl.
 3. `docker/`: Contains Dockerfile for building the Jenkins slave image.
@@ -67,7 +67,9 @@ Before running the project, make sure you have the following prerequisites insta
     terraform plan
     terraform apply
     ```
+
 ### Step 2: Deploy Jenkins with Ansible
+
 1. Navigate to the ansible directory and Execute the Ansible playbook to deploy Jenkins master and slave:
 
    ```bash
@@ -75,4 +77,110 @@ Before running the project, make sure you have the following prerequisites insta
    ansible-playbook deploy.yaml
    ```
 
-2. Update the terraform.tfvars file with your GCP credentials and desired cluster configuration.
+### Step 3: Setup Jenkins
+
+1. get jenkins ip to access it throw the browser :8080 
+
+   ```bash
+    kubectl get service jenkins-service -n devops-tools --output='jsonpath={.status.loadBalancer.ingress[0].ip}'
+   ```
+
+2. get initial password from Jenkins pod
+
+   ```bash
+    kubectl get po -n devops-tools
+    kubectl exec -it <jenkins-master-pod-name> -n devops-tools bash
+    ```
+   ```bash
+    cat /var/jenkins_home/secrets/initialAdminPassword
+   ```
+
+3. create jenkis user
+
+![Image Description](./images/create_user_jenkins.png)
+
+### Step 4: Setup Jenkins slave
+
+1. create password for jenkins user at slave pod and change permession fro docker.sock
+
+   ```bash
+    kubectl get po -n devops-tools
+    kubectl exec -it <jenkins-slave-pod-name> -n devops-tools bash
+   ```
+   ```bash
+    passwd jenkins
+    chmod 777 /var/run/docker.sock
+   ```
+
+2. get initial password from Jenkins pod
+
+   ```bash
+    kubectl get po -n devops-tools
+    kubectl exec -it <jenkins-master-pod-name> -n devops-tools bash
+    ```
+   ```bash
+    cat /var/jenkins_home/secrets/initialAdminPassword
+   ```
+
+3. link the slave by adding node at Jenkins master and add service account 
+
+![Image Description](./images/node_name.png)
+![Image Description](./images/user_credential.png)
+![Image Description](./images/slave_setup.png)
+![Image Description](./images/node_done.png)
+
+### Step 5: Create pipeline
+
+1. setup secret files using in jenkins script
+
+![Image Description](./images/secrets.png)
+
+2. create pipeline
+
+   ```bash
+    pipeline {
+        agent { label 'jenkins_slave' }
+        stages {
+            stage('build') {
+                steps {
+                    echo 'build'
+                    script {
+                        withCredentials([usernamePassword(credentialsId: 'docker_login', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                                sh '''
+                                    docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
+                                    docker build -t alytaha46/bakehouseproject:v${BUILD_NUMBER} .
+                                    docker push alytaha46/bakehouseproject:v${BUILD_NUMBER}
+                                '''
+                        }
+                    }
+                }
+            }
+            stage('deploy') {
+                steps {
+                    echo 'deploy'
+                    script {
+                        withCredentials([file(credentialsId: 'slave_kubeconfig', variable: 'KUBECONFIG_ITI'),
+                                        file(credentialsId: 'service_account_key', variable: 'KEYY')]) 
+                        {
+                            sh """
+                                gcloud auth activate-service-account --key-file ${KEYY}
+                            """
+                            // Check if the release is already deployed
+                            def releaseStatus = sh(returnStatus: true, script: "helm status bakehouseapp --kubeconfig ${KUBECONFIG_ITI}")
+                            // Install or upgrade the custom chart using Helm based on the release status
+                            if (releaseStatus == 0) {
+                                sh """
+                                    helm upgrade bakehouseapp ./bakehousechart/ --kubeconfig ${KUBECONFIG_ITI} --set image.tag=v${BUILD_NUMBER} --values bakehousechart/master-values.yaml
+                                """
+                            } else {
+                                sh """
+                                    helm install bakehouseapp ./bakehousechart/ --kubeconfig ${KUBECONFIG_ITI} --set image.tag=v${BUILD_NUMBER} --values bakehousechart/master-values.yaml
+                                """
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }      
+   ```
