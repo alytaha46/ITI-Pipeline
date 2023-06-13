@@ -1,0 +1,58 @@
+---
+- name: Deploy Kubernetes Infrastructure and Jenkins
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Get Kubernetes cluster name
+      shell: chdir=../Terraform terraform output -raw kubernetes_cluster_name
+      register: kubernetes_cluster_name_output
+
+    - name: Get region
+      shell: chdir=../Terraform terraform output -raw region
+      register: region_output
+
+    - name: Get Kubernetes cluster credentials
+      command: gcloud container clusters get-credentials "{{ kubernetes_cluster_name_output.stdout }}" --region "{{ region_output.stdout }}"
+
+    - name: Create devops-tools namespace
+      command: kubectl create namespace devops-tools
+      changed_when: false
+
+    - name: Apply service account configuration
+      command: kubectl apply -f ../kubernetes-jenkins/serviceAccount.yaml
+      changed_when: false
+
+    - name: Create volume
+      command: kubectl create -f ../kubernetes-jenkins/volume.yaml
+      changed_when: false
+
+    - name: Apply Jenkins deployment
+      command: kubectl apply -f ../kubernetes-jenkins/deployment.yaml
+      changed_when: false
+
+    - name: Apply Jenkins service
+      command: kubectl apply -f ../kubernetes-jenkins/service.yaml
+      changed_when: false
+
+    - name: Change directory to jenkins slave
+      command: kubectl apply -f ../jenkins\ slave/jenkins-slave-deployment.yaml
+      changed_when: false
+
+    - name: Apply Jenkins slave service
+      command: kubectl apply -f ../jenkins\ slave/jenkins-slave-service.yaml
+      changed_when: false
+
+    - name: Get Kubernetes cluster IP
+      command: kubectl get service kubernetes -n default --output='jsonpath={.spec.clusterIP}'
+      register: kubernetes_cluster_ip
+
+    - debug:
+        var: kubernetes_cluster_ip.stdout
+    
+    - name: Get jenkins IP
+      command: kubectl get service jenkins-service -n devops-tools --output='jsonpath={.status.loadBalancer.ingress[0].ip}'
+      register: external_ip
+
+    - debug:
+        var: external_ip.stdout
