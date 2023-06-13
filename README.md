@@ -184,3 +184,12 @@ Before running the project, make sure you have the following prerequisites insta
         }
     }      
    ```
+
+![Image Description](./images/done_pipeline.png)
+
+
+3. get bakehouse app ip to access it throw the browser 
+
+   ```bash
+    kubectl get service bakehouseapp-service -n bakehouse-ns --output='jsonpath={.status.loadBalancer.ingress[0].ip}'
+   ```
