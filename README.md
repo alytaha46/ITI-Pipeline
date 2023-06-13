@@ -112,17 +112,7 @@ Before running the project, make sure you have the following prerequisites insta
     chmod 777 /var/run/docker.sock
    ```
 
-2. get initial password from Jenkins pod
-
-   ```bash
-    kubectl get po -n devops-tools
-    kubectl exec -it <jenkins-master-pod-name> -n devops-tools bash
-    ```
-   ```bash
-    cat /var/jenkins_home/secrets/initialAdminPassword
-   ```
-
-3. link the slave by adding node at Jenkins master and add service account 
+2. link the slave by adding node at Jenkins master and add service account 
 
 ![Image Description](./images/node_name.png)
 ![Image Description](./images/user_credential.png)
