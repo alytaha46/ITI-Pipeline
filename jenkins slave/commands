@@ -1,8 +1,10 @@
-service ssh start
+#service ssh start
+
 passwd jenkins
 chmod 777 /var/run/docker.sock
+
 # to install envsubst
 #apt install -y gettext
 
-dont forget to make .kube/config with base64 -w0
+#dont forget to make .kube/config with base64 -w0
 
