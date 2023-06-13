@@ -24,9 +24,9 @@ Before running the project, make sure you have the following prerequisites insta
 5. Ansible installed.
 6. Docker installed.
 
-## Installation
+## Pipeline Steps
 
-To deploy the Jenkins pipeline, follow these steps:
+### Step 1: Create GKE Cluster with Terraform
 
 1. Clone the repository:
    ```bash
@@ -67,8 +67,12 @@ To deploy the Jenkins pipeline, follow these steps:
     terraform plan
     terraform apply
     ```
-Create the GKE cluster:
+### Step 2: Deploy Jenkins with Ansible
+1. Navigate to the ansible directory and Execute the Ansible playbook to deploy Jenkins master and slave:
 
-bash
-Copy code
-terraform apply
+   ```bash
+   cd ../ansible
+   ansible-playbook deploy.yaml
+   ```
+
+2. Update the terraform.tfvars file with your GCP credentials and desired cluster configuration.
