@@ -6,3 +6,5 @@ Terraform/.terraform/providers/registry.terraform.io/hashicorp/google/4.69.1/lin
 subtle-tooling-387906-5872adcfbee0.json
 script.sh
 config
+Terraform/.terraform.tfstate.lock.info
+.gitignore
