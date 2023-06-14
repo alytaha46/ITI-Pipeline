@@ -112,7 +112,7 @@ Before running the project, make sure you have the following prerequisites insta
     chmod 777 /var/run/docker.sock
    ```
 
-2. link the slave by adding node at Jenkins master and add service account 
+2. link the slave by adding node at Jenkins master
 
 ![Image Description](./images/node_name.png)
 ![Image Description](./images/user_credential.png)
