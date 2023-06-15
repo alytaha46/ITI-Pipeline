@@ -8,7 +8,7 @@ The project consists of the following components:
 
 1. `Terraform/`: Contains Terraform code for creating the GKE private cluster, vpc, subnet and nat gateway.
 
-![Image Description](./images/diagram.jpg)
+![Image Description](./images/diagram.png)
 
 2. `ansible/`: Contains Ansible playbook for deploying Jenkins on the GKE cluster using kubectl.
 3. `docker/`: Contains Dockerfile for building the Jenkins slave image.
